@@ -29,7 +29,6 @@
 
 #include "class.hpp"
 #include <camp/classget.hpp>
-#include <camp/errors.hpp>
 #include <boost/test/unit_test.hpp>
 
 using namespace ClassTest;
@@ -55,7 +54,7 @@ BOOST_AUTO_TEST_CASE(declareExceptions)
     // to make sure it is declared
     camp::classByType<MyClass>();
 
-    BOOST_CHECK_THROW(camp::Class::declare<MyClass>("ClassTest::MyUndeclaredClass"), camp::ClassAlreadyCreated);
+    BOOST_CHECK_THROW(camp::Class::declare<MyClass>(), camp::ClassAlreadyCreated);
     BOOST_CHECK_THROW(camp::Class::declare<MyUndeclaredClass>("ClassTest::MyClass"), camp::ClassAlreadyCreated);
 }
 
@@ -139,6 +138,14 @@ BOOST_AUTO_TEST_CASE(rtti)
     delete nortti;
     delete derived;
     delete base;
+}
+
+//-----------------------------------------------------------------------------
+BOOST_AUTO_TEST_CASE(typeNames)
+{
+    BOOST_CHECK(strcmp(camp::util::typeAsString(camp::noType), "none")==0);
+    BOOST_CHECK(strcmp(camp::util::typeAsString(camp::realType), "real")==0);
+    BOOST_CHECK(strcmp(camp::util::typeAsString(camp::userType), "user")==0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -34,11 +34,7 @@
 #define CAMP_ENUMOBJECT_HPP
 
 
-#include <camp/config.hpp>
 #include <camp/enumget.hpp>
-#include <boost/type_traits.hpp>
-#include <boost/operators.hpp>
-#include <boost/utility/enable_if.hpp>
 #include <string>
 
 
@@ -52,7 +48,7 @@ namespace camp
  *
  * \sa UserObject
  */
-class CAMP_API EnumObject : boost::totally_ordered<EnumObject>
+class CAMP_API EnumObject
 {
 public:
 
@@ -62,7 +58,7 @@ public:
      * \param value Value to store in the enum object
      */
     template <typename T>
-    EnumObject(T value, typename boost::enable_if<boost::is_enum<T> >::type* = 0);
+    EnumObject(T value, typename std::enable_if<std::is_enum<T>::value >::type* = 0);
 
     /**
      * \brief Get the value of the enum object
@@ -94,7 +90,7 @@ public:
      *
      * \return True if both enum objects are the same, false otherwise
      */
-    bool operator==(const EnumObject& other) const;
+    bool operator == (const EnumObject& other) const;
 
     /**
      * \brief Operator < to compare two enum objects
@@ -103,7 +99,7 @@ public:
      *
      * \return True if this < other
      */
-    bool operator<(const EnumObject& other) const;
+    bool operator < (const EnumObject& other) const;
 
 private:
 

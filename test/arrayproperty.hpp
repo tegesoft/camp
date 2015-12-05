@@ -32,7 +32,7 @@
 
 #include <camp/camptype.hpp>
 #include <camp/class.hpp>
-#include <boost/array.hpp>
+#include <camp/classbuilder.hpp>
 #include <list>
 #include <vector>
 
@@ -76,7 +76,7 @@ namespace ArrayPropertyTest
         }
 
         bool bools[2];
-        boost::array<int, 3> ints;
+        std::array<int, 3> ints;
         std::vector<std::string> strings;
         std::list<MyType> objects;
     };
@@ -84,7 +84,7 @@ namespace ArrayPropertyTest
     void declare()
     {
         camp::Class::declare<MyType>("ArrayPropertyTest::MyType");
-
+        
         camp::Class::declare<MyClass>("ArrayPropertyTest::MyClass")
             .property("bools", &MyClass::bools)
             .property("ints", &MyClass::ints)

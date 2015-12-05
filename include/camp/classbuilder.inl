@@ -37,8 +37,8 @@ template <typename T>
 ClassBuilder<T>::ClassBuilder(Class& target)
     : m_target(&target)
     , m_currentTagHolder(m_target)
-    , m_currentProperty(0)
-    , m_currentFunction(0)
+    , m_currentProperty(nullptr)
+    , m_currentFunction(nullptr)
 {
 }
 
@@ -52,10 +52,9 @@ ClassBuilder<T>& ClassBuilder<T>::base()
     std::string baseName = baseClass.name();
 
     // First make sure that the base class is not already a base of the current class
-    Class::BaseList::const_iterator endBase = m_target->m_bases.end();
-    for (Class::BaseList::const_iterator it = m_target->m_bases.begin(); it != endBase; ++it)
+    for (Class::BaseInfo& bi : m_target->m_bases)
     {
-        assert(it->base->name() != baseName);
+        assert(bi.base->name() != baseName);
     }
 
     // Compute the offset to apply for pointer conversions
@@ -74,7 +73,7 @@ ClassBuilder<T>& ClassBuilder<T>::base()
         it != baseClass.m_properties.end();
         ++it)
     {
-        m_target->m_properties.push_back(*it);
+        m_target->m_properties.insert(it);
     }
 
     // Copy all functions of the base class into the current class
@@ -82,7 +81,7 @@ ClassBuilder<T>& ClassBuilder<T>::base()
         it != baseClass.m_functions.end();
         ++it)
     {
-        m_target->m_functions.push_back(*it);
+        m_target->m_functions.insert(it);
     }
 
     return *this;
@@ -130,7 +129,7 @@ template <typename F>
 ClassBuilder<T>& ClassBuilder<T>::function(const std::string& name, F function)
 {
     // Get a uniform function type from F, whatever it really is
-    typedef typename boost::function_types::function_type<F>::type Signature;
+    typedef typename detail::FunctionTraits<F>::type Signature;
 
     // Construct and add the metafunction
     return addFunction(new detail::FunctionImpl<Signature>(name, function));
@@ -139,7 +138,7 @@ ClassBuilder<T>& ClassBuilder<T>::function(const std::string& name, F function)
 //-------------------------------------------------------------------------------------------------
 template <typename T>
 template <typename F>
-ClassBuilder<T>& ClassBuilder<T>::function(const std::string& name, boost::function<F> function)
+ClassBuilder<T>& ClassBuilder<T>::function(const std::string& name, std::function<F> function)
 {
     return addFunction(new detail::FunctionImpl<F>(name, function));
 }
@@ -150,8 +149,8 @@ template <typename F1, typename F2>
 ClassBuilder<T>& ClassBuilder<T>::function(const std::string& name, F1 function1, F2 function2)
 {
     // Get uniform function types from F1 and F2, whatever they really are
-    typedef typename boost::function_types::function_type<F1>::type Signature1;
-    typedef typename boost::function_types::function_type<F2>::type Signature2;
+    typedef typename detail::FunctionTraits<F1>::type Signature1;
+    typedef typename detail::FunctionTraits<F2>::type Signature2;
 
     // Construct and add the metafunction
     return addFunction(new detail::FunctionImpl<Signature1, Signature2>(name, function1, function2));
@@ -174,7 +173,7 @@ ClassBuilder<T>& ClassBuilder<T>::tag(const Value& id, const U& value)
 
     // For the special case of Getter<Value>, the ambiguity between both constructors
     // cannot be automatically solved, so let's do it manually
-    typedef typename boost::mpl::if_c<detail::FunctionTraits<U>::isFunction, boost::function<Value (T&)>, Value>::type Type;
+    typedef typename util::if_c<detail::FunctionTraits<U>::isFunction, std::function<Value (T&)>, Value>::type Type;
 
     // Add the new tag (override if already exists)
     m_currentTagHolder->m_tags[id] = detail::Getter<Value>(Type(value));
@@ -187,7 +186,7 @@ template <typename T>
 ClassBuilder<T>& ClassBuilder<T>::readable(bool value)
 {
     // Make sure we have a valid property
-    assert(m_currentProperty != 0);
+    assert(m_currentProperty != nullptr);
 
     m_currentProperty->m_readable = detail::Getter<bool>(value);
 
@@ -200,9 +199,9 @@ template <typename F>
 ClassBuilder<T>& ClassBuilder<T>::readable(F function)
 {
     // Make sure we have a valid property
-    assert(m_currentProperty != 0);
+    assert(m_currentProperty != nullptr);
 
-    m_currentProperty->m_readable = detail::Getter<bool>(boost::function<bool (T&)>(function));
+    m_currentProperty->m_readable = detail::Getter<bool>(std::function<bool (T&)>(function));
 
     return *this;
 }
@@ -212,7 +211,7 @@ template <typename T>
 ClassBuilder<T>& ClassBuilder<T>::writable(bool value)
 {
     // Make sure we have a valid property
-    assert(m_currentProperty != 0);
+    assert(m_currentProperty != nullptr);
 
     m_currentProperty->m_writable = detail::Getter<bool>(value);
 
@@ -225,9 +224,9 @@ template <typename F>
 ClassBuilder<T>& ClassBuilder<T>::writable(F function)
 {
     // Make sure we have a valid property
-    assert(m_currentProperty != 0);
+    assert(m_currentProperty != nullptr);
 
-    m_currentProperty->m_writable = detail::Getter<bool>(boost::function<bool (T&)>(function));
+    m_currentProperty->m_writable = detail::Getter<bool>(std::function<bool (T&)>(function));
 
     return *this;
 }
@@ -237,7 +236,7 @@ template <typename T>
 ClassBuilder<T>& ClassBuilder<T>::callable(bool value)
 {
     // Make sure we have a valid function
-    assert(m_currentFunction != 0);
+    assert(m_currentFunction != nullptr);
 
     m_currentFunction->m_callable = detail::Getter<bool>(value);
 
@@ -250,73 +249,19 @@ template <typename F>
 ClassBuilder<T>& ClassBuilder<T>::callable(F function)
 {
     // Make sure we have a valid function
-    assert(m_currentFunction != 0);
+    assert(m_currentFunction != nullptr);
 
-    m_currentFunction->m_callable = detail::Getter<bool>(boost::function<bool (T&)>(function));
-
-    return *this;
-}
-
-//-------------------------------------------------------------------------------------------------
-template <typename T>
-ClassBuilder<T>& ClassBuilder<T>::constructor0()
-{
-    Constructor* constructor = new detail::ConstructorImpl0<T>;
-    m_target->m_constructors.push_back(Class::ConstructorPtr(constructor));
+    m_currentFunction->m_callable = detail::Getter<bool>(std::function<bool (T&)>(function));
 
     return *this;
 }
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
-template <typename A0>
-ClassBuilder<T>& ClassBuilder<T>::constructor1()
+template <typename... A>
+ClassBuilder<T>& ClassBuilder<T>::constructor()
 {
-    Constructor* constructor = new detail::ConstructorImpl1<T, A0>;
-    m_target->m_constructors.push_back(Class::ConstructorPtr(constructor));
-
-    return *this;
-}
-
-//-------------------------------------------------------------------------------------------------
-template <typename T>
-template <typename A0, typename A1>
-ClassBuilder<T>& ClassBuilder<T>::constructor2()
-{
-    Constructor* constructor = new detail::ConstructorImpl2<T, A0, A1>;
-    m_target->m_constructors.push_back(Class::ConstructorPtr(constructor));
-
-    return *this;
-}
-
-//-------------------------------------------------------------------------------------------------
-template <typename T>
-template <typename A0, typename A1, typename A2>
-ClassBuilder<T>& ClassBuilder<T>::constructor3()
-{
-    Constructor* constructor = new detail::ConstructorImpl3<T, A0, A1, A2>;
-    m_target->m_constructors.push_back(Class::ConstructorPtr(constructor));
-
-    return *this;
-}
-
-//-------------------------------------------------------------------------------------------------
-template <typename T>
-template <typename A0, typename A1, typename A2, typename A3>
-ClassBuilder<T>& ClassBuilder<T>::constructor4()
-{
-    Constructor* constructor = new detail::ConstructorImpl4<T, A0, A1, A2, A3>;
-    m_target->m_constructors.push_back(Class::ConstructorPtr(constructor));
-
-    return *this;
-}
-
-//-------------------------------------------------------------------------------------------------
-template <typename T>
-template <typename A0, typename A1, typename A2, typename A3, typename A4>
-ClassBuilder<T>& ClassBuilder<T>::constructor5()
-{
-    Constructor* constructor = new detail::ConstructorImpl5<T, A0, A1, A2, A3, A4>;
+    Constructor* constructor = new detail::ConstructorImpl<T, A...>;
     m_target->m_constructors.push_back(Class::ConstructorPtr(constructor));
 
     return *this;
@@ -348,16 +293,16 @@ template <typename T>
 ClassBuilder<T>& ClassBuilder<T>::addProperty(Property* property)
 {
     // Retrieve the class' properties indexed by name
-    Class::PropertyNameIndex& properties = m_target->m_properties.get<Class::Name>();
+    Class::PropertyTable& properties = m_target->m_properties;
 
     // First remove any property that already exists with the same name
     properties.erase(property->name());
 
     // Insert the new property
-    properties.insert(Class::PropertyPtr(property));
+    properties.insert(property->name(), Class::PropertyPtr(property));
 
     m_currentTagHolder = m_currentProperty = property;
-    m_currentFunction = 0;
+    m_currentFunction = nullptr;
 
     return *this;
 }
@@ -367,16 +312,16 @@ template <typename T>
 ClassBuilder<T>& ClassBuilder<T>::addFunction(Function* function)
 {
     // Retrieve the class' functions indexed by name
-    Class::FunctionNameIndex& functions = m_target->m_functions.get<Class::Name>();
+    Class::FunctionTable& functions = m_target->m_functions;
 
     // First remove any function that already exists with the same name
     functions.erase(function->name());
 
     // Insert the new function
-    functions.insert(Class::FunctionPtr(function));
+    functions.insert(function->name(), Class::FunctionPtr(function));
 
     m_currentTagHolder = m_currentFunction = function;
-    m_currentProperty = 0;
+    m_currentProperty = nullptr;
 
     return *this;
 }

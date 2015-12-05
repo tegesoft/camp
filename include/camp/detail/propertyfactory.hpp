@@ -34,22 +34,19 @@
 #define CAMP_DETAIL_PROPERTYFACTORY_HPP
 
 
-#include <camp/type.hpp>
 #include <camp/detail/simplepropertyimpl.hpp>
 #include <camp/detail/arraypropertyimpl.hpp>
 #include <camp/detail/enumpropertyimpl.hpp>
 #include <camp/detail/userpropertyimpl.hpp>
 #include <camp/detail/functiontraits.hpp>
-#include <boost/function.hpp>
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-#include <boost/type_traits/is_void.hpp>
 
 
 namespace camp
 {
 namespace detail
 {
+using namespace std::placeholders;
+    
 /*
  * Instanciate simple properties
  */
@@ -107,7 +104,7 @@ struct CopyHelper
  * Specialization of CopyHelper for non-copyable types
  */
 template <typename T>
-struct CopyHelper<T, typename boost::enable_if_c<!StaticTypeId<T>::copyable>::type>
+struct CopyHelper<T, typename std::enable_if< !StaticTypeId<T>::copyable>::type >
 {
     static bool copy(T&, const Value&)
     {
@@ -134,10 +131,10 @@ struct ReturnHelper
  * Specialization of ReturnHelper for smart pointer types
  */
 template <template <typename> class T, typename U>
-struct ReturnHelper<T<U>, typename boost::enable_if<IsSmartPointer<T<U>, U> >::type>
+struct ReturnHelper<T<U>, std::enable_if< IsSmartPointer<T<U>, U>::value > >
 {
     typedef U* Type;
-    static Type get(T<U> value) {return boost::get_pointer(value);}
+    static Type get(T<U> value) {return get_pointer(value);}
 };
 
 /**
@@ -187,14 +184,14 @@ public:
 
 private:
 
-    boost::function<R (C&)> m_getter;
+    std::function<R (C&)> m_getter;
 };
 
 /*
  * Property accessor composed of 1 read-write accessor
  */
 template <typename C, typename R>
-class Accessor1<C, R, typename boost::enable_if_c<ObjectTraits<R>::isWritable>::type>
+class Accessor1<C, R, typename std::enable_if< ObjectTraits<R>::isWritable>::type >
 {
 public:
 
@@ -226,7 +223,7 @@ public:
 
 private:
 
-    boost::function<R (C&)> m_getter;
+    std::function<R (C&)> m_getter;
 };
 
 /*
@@ -240,7 +237,7 @@ public:
     typedef ObjectTraits<R> Traits;
     typedef typename Traits::DataType DataType;
     typedef C ClassType;
-    typedef typename boost::remove_reference<R>::type ArgumentType;
+    typedef typename std::remove_reference<R>::type ArgumentType;
 
     enum
     {
@@ -268,8 +265,8 @@ public:
 
 private:
 
-    boost::function<R (C&)> m_getter;
-    boost::function<void (C&, ArgumentType)> m_setter;
+    std::function<R (C&)> m_getter;
+    std::function<void (C&, ArgumentType)> m_setter;
 };
 
 /*
@@ -310,15 +307,15 @@ public:
 
 private:
 
-    boost::function<R (N&)> m_getter1;
-    boost::function<N& (C&)> m_getter2;
+    std::function<R (N&)> m_getter1;
+    std::function<N& (C&)> m_getter2;
 };
 
 /*
  * Property accessor composed of 1 composed read-write accessor
  */
 template <typename C, typename N, typename R>
-class Accessor3<C, N, R, typename boost::enable_if_c<ObjectTraits<R>::isWritable>::type>
+class Accessor3<C, N, R, typename std::enable_if< ObjectTraits<R>::isWritable>::type >
 {
 public:
 
@@ -351,8 +348,8 @@ public:
 
 private:
 
-    boost::function<R (N&)> m_getter1;
-    boost::function<N& (C&)> m_getter2;
+    std::function<R (N&)> m_getter1;
+    std::function<N& (C&)> m_getter2;
 };
 
 
@@ -370,7 +367,7 @@ struct PropertyFactory1
 
         typedef camp_ext::ValueMapper<typename AccessorType::DataType> ValueMapper;
         typedef typename PropertyMapper<AccessorType, ValueMapper::type>::Type PropertyType;
-
+        
         return new PropertyType(name, AccessorType(accessor));
     }
 };
@@ -398,10 +395,10 @@ struct PropertyFactory2
  * Specialization of PropertyFactory2 with 2 getters (which will produce 1 composed getter)
  */
 template <typename C, typename F1, typename F2>
-struct PropertyFactory2<C, F1, F2, typename boost::enable_if_c<!boost::is_void<typename FunctionTraits<F2>::ReturnType>::value>::type>
+struct PropertyFactory2<C, F1, F2, typename std::enable_if< !std::is_void<typename FunctionTraits<F2>::ReturnType>::value>::type >
 {
     typedef typename FunctionTraits<F1>::ReturnType ReturnType;
-    typedef typename boost::remove_reference<typename FunctionTraits<F2>::ReturnType>::type OtherClassType;
+    typedef typename std::remove_reference<typename FunctionTraits<F2>::ReturnType>::type OtherClassType;
 
     static Property* get(const std::string& name, F1 accessor1, F2 accessor2)
     {
@@ -430,8 +427,8 @@ struct PropertyFactory3
         typedef camp_ext::ValueMapper<typename AccessorType::DataType> ValueMapper;
         typedef typename PropertyMapper<AccessorType, ValueMapper::type>::Type PropertyType;
 
-        return new PropertyType(name, AccessorType(boost::bind(boost::type<ReturnType>(), accessor1, boost::bind(boost::type<InnerType>(), accessor3, _1)),
-                                                   boost::bind(boost::type<void>(), accessor2, boost::bind(boost::type<InnerType>(), accessor3, _1), _2)));
+        return new PropertyType(name, AccessorType(std::bind(accessor1, std::bind(accessor3, _1)),
+                                                   std::bind(accessor2, std::bind(accessor3, _1), _2)));
     }
 };
 

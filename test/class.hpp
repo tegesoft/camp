@@ -32,6 +32,7 @@
 
 #include <camp/camptype.hpp>
 #include <camp/class.hpp>
+#include <camp/classbuilder.hpp>
 
 namespace ClassTest
 {
@@ -55,6 +56,7 @@ namespace ClassTest
 
     struct Base
     {
+        virtual ~Base() {}
         CAMP_RTTI();
     };
 

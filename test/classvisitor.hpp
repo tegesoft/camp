@@ -39,6 +39,7 @@
 #include <camp/enumproperty.hpp>
 #include <camp/userproperty.hpp>
 #include <camp/function.hpp>
+#include <camp/classbuilder.hpp>
 
 namespace ClassVisitorTest
 {
@@ -55,27 +56,27 @@ namespace ClassVisitorTest
         {
         }
 
-        virtual void visit(const camp::SimpleProperty& property)
+        virtual void visit(const camp::SimpleProperty& property) override
         {
             simpleVisited = true;
         }
 
-        virtual void visit(const camp::ArrayProperty& property)
+        virtual void visit(const camp::ArrayProperty& property) override
         {
             arrayVisited = true;
         }
 
-        virtual void visit(const camp::EnumProperty& property)
+        virtual void visit(const camp::EnumProperty& property) override
         {
             enumVisited = true;
         }
 
-        virtual void visit(const camp::UserProperty& property)
+        virtual void visit(const camp::UserProperty& property) override
         {
             userVisited = true;
         }
 
-        virtual void visit(const camp::Function& function)
+        virtual void visit(const camp::Function& function) override
         {
             functionVisited = true;
         }
@@ -109,7 +110,7 @@ namespace ClassVisitorTest
         camp::Enum::declare<MyEnum>("ClassVisitorTest::MyEnum");
 
         camp::Class::declare<MyType>("ClassVisitorTest::MyType");
-
+        
         camp::Class::declare<MyClass>("ClassVisitorTest::MyClass")
             .property("simple", &MyClass::simpleProp)
             .property("array", &MyClass::arrayProp)

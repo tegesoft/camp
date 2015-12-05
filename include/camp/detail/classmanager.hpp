@@ -15,10 +15,10 @@
 ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 ** copies of the Software, and to permit persons to whom the Software is
 ** furnished to do so, subject to the following conditions:
-** 
+**
 ** The above copyright notice and this permission notice shall be included in
 ** all copies or substantial portions of the Software.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 ** IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 ** FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,19 +33,9 @@
 #ifndef CAMP_DETAIL_CLASSMANAGER_HPP
 #define CAMP_DETAIL_CLASSMANAGER_HPP
 
-
-#include <camp/config.hpp>
 #include <camp/detail/observernotifier.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
 #include <string>
-
-
-namespace bm = boost::multi_index;
+#include <map>
 
 namespace camp
 {
@@ -61,7 +51,7 @@ namespace detail
  *
  * \sa Class
  */
-class CAMP_API ClassManager : public ObserverNotifier, boost::noncopyable
+class CAMP_API ClassManager : public ObserverNotifier
 {
 public:
 
@@ -78,14 +68,13 @@ public:
      * This is the entry point for every metaclass creation. This
      * function also notifies registered observers after successful creations.
      *
-     * \param name Name of the metaclass to create (must be unique)
-     * \param id Identifier of the C++ class bound to the metaclass
+     * \param id Identifier of the C++ class bound to the metaclass (unique)
      *
      * \return Reference to the new metaclass
      *
      * \throw ClassAlreadyCreated \a name or \a id already exists
      */
-    Class& addClass(const std::string& name, const std::string& id);
+    Class& addClass(const std::string& id);
 
     /**
      * \brief Get the total number of metaclasses
@@ -109,17 +98,6 @@ public:
     const Class& getByIndex(std::size_t index) const;
 
     /**
-     * \brief Get a metaclass from its name
-     *
-     * \param name Name of the metaclass to retrieve
-     *
-     * \return Reference to the requested metaclass
-     *
-     * \throw ClassNotFound name is not the name of an existing metaclass
-     */
-    const Class& getByName(const std::string& name) const;
-
-    /**
      * \brief Get a metaclass from a C++ type
      *
      * \param id Identifier of the C++ type
@@ -138,7 +116,7 @@ public:
      *
      * \param id Identifier of the C++ type
      *
-     * \return Pointer to the requested metaclass, or 0 if not found
+     * \return Pointer to the requested metaclass, or null pointer if not found
      */
     const Class* getByIdSafe(const std::string& id) const;
 
@@ -150,8 +128,6 @@ public:
      * \return True if the class exists, false otherwise
      */
     bool classExists(const std::string& id) const;
-
-private:
 
     /**
      * \brief Default constructor
@@ -165,29 +141,10 @@ private:
      */
     ~ClassManager();
 
-    /**
-     * \brief Structure gathering a class, its type identifier and its name
-     */
-    struct ClassInfo
-    {
-        std::string id;
-        std::string name;
-        boost::shared_ptr<Class> classPtr;
-    };
+private:
 
-    struct Id;
-    struct Name;
-
-    typedef boost::multi_index_container<ClassInfo,
-        bm::indexed_by<bm::ordered_unique<bm::tag<Id>,   bm::member<ClassInfo, std::string, &ClassInfo::id> >,
-                       bm::ordered_unique<bm::tag<Name>, bm::member<ClassInfo, std::string, &ClassInfo::name> >
-        >
-    > ClassTable;
-
-    typedef ClassTable::index<Id>::type IdIndex;
-    typedef ClassTable::index<Name>::type NameIndex;
-
-    ClassTable m_classes; ///< Table storing classes indexed by their id and name
+    typedef std::map<std::string, Class*> ClassTable; ///< No need for shared pointers in here, we're the one and only instance holder
+    ClassTable m_classes; ///< Table storing classes indexed by their ID
 };
 
 } // namespace detail

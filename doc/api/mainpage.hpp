@@ -37,7 +37,7 @@
  *
  * \code
  * #include <camp/camptype.hpp>
- * #include <camp/class.hpp>
+ * #include <camp/classbuilder.hpp>
  * #include <string>
  * #include <iostream>
  * 
@@ -89,7 +89,7 @@
  * {
  *     // Bind our Person class to CAMP
  *     camp::Class::declare<Person>("Person")
- *         .constructor1<std::string>()
+ *         .constructor<std::string>()
  *         .property("name", &Person::name)
  *         .property("age", &Person::age, &Person::setAge)
  *         .function("speak", &Person::speak);

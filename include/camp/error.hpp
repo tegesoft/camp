@@ -15,10 +15,10 @@
 ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 ** copies of the Software, and to permit persons to whom the Software is
 ** furnished to do so, subject to the following conditions:
-** 
+**
 ** The above copyright notice and this permission notice shall be included in
 ** all copies or substantial portions of the Software.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 ** IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 ** FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,8 +35,7 @@
 
 
 #include <camp/config.hpp>
-#include <boost/current_function.hpp>
-#include <boost/lexical_cast.hpp>
+#include <camp/util.hpp>
 #include <exception>
 #include <string>
 
@@ -121,7 +120,7 @@ private:
 /**
  * \brief Trigger a CAMP error
  */
-#define CAMP_ERROR(error) throw camp::Error::prepare(error, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION)
+#define CAMP_ERROR(error) throw camp::Error::prepare(error, __FILE__, __LINE__, __func__)
 
 
 #endif // CAMP_ERROR_HPP

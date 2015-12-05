@@ -35,9 +35,6 @@
 
 
 #include <camp/userobject.hpp>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-
 
 namespace camp
 {
@@ -80,16 +77,16 @@ public:
     /**
      * \brief Construct the getter implementation from a function
      */
-    GetterImpl(boost::function<T (C&)> function);
+    GetterImpl(std::function<T (C&)> function);
 
     /**
      * \see GetterInterface::get
      */
-    virtual T get(const UserObject& object) const;
+    virtual T get(const UserObject& object) const override;
 
 private:
 
-    boost::function<T (C&)> m_function; ///< Function object storing the actual getter
+    std::function<T (C&)> m_function; ///< Function object storing the actual getter
 };
 
 /**
@@ -124,7 +121,7 @@ public:
      * \param function Function object storing the actual getter
      */
     template <typename C>
-    Getter(boost::function<T (C&)> function);
+    Getter(std::function<T (C&)> function);
 
     /**
      * \brief Get the default value of the getter
@@ -146,7 +143,7 @@ public:
 
 private:
 
-    boost::shared_ptr<GetterInterface<T> > m_getter; ///< Implementation of the getter
+    std::shared_ptr<GetterInterface<T> > m_getter; ///< Implementation of the getter
     T m_defaultValue; ///< Default value to return if no function or no object is specified
 };
 

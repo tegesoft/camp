@@ -30,8 +30,6 @@
 
 #include <camp/enum.hpp>
 #include <camp/errors.hpp>
-#include <camp/detail/enummanager.hpp>
-#include <algorithm>
 
 
 namespace camp
@@ -45,69 +43,64 @@ const std::string& Enum::name() const
 //-------------------------------------------------------------------------------------------------
 std::size_t Enum::size() const
 {
-    return m_pairs.size();
+    return m_enums.size();
 }
 
 //-------------------------------------------------------------------------------------------------
-const Enum::Pair& Enum::pair(std::size_t index) const
+Enum::Pair Enum::pair(std::size_t index) const
 {
     // Make sure that the index is not out of range
-    if (index >= m_pairs.size())
-        CAMP_ERROR(OutOfRange(index, m_pairs.size()));
+    if (index >= m_enums.size())
+        CAMP_ERROR(OutOfRange(index, m_enums.size()));
 
-    return m_pairs[index];
+    auto it = m_enums.at(index);
+    return Pair(it->first, it->second);
 }
 
 //-------------------------------------------------------------------------------------------------
 bool Enum::hasName(const std::string& name) const
 {
-    const NameIndex& names = m_pairs.get<Name>();
-
-    return names.find(name) != names.end();
+    return m_enums.containsKey(name);
 }
 
 //-------------------------------------------------------------------------------------------------
-bool Enum::hasValue(long value) const
+bool Enum::hasValue(EnumValue value) const
 {
-    const ValueIndex& values = m_pairs.get<Val>();
-
-    return values.find(value) != values.end();
+    return m_enums.containsValue(value);
 }
 
 //-------------------------------------------------------------------------------------------------
-const std::string& Enum::name(long value) const
+const std::string& Enum::name(EnumValue value) const
 {
-    const ValueIndex& values = m_pairs.get<Val>();
-
-    ValueIndex::const_iterator it = values.find(value);
-    if (it == values.end())
+    auto it = m_enums.findValue(value);
+    
+    if (it == m_enums.end())
         CAMP_ERROR(EnumValueNotFound(value, name()));
 
-    return it->name;
+    return it->first;
 }
 
 //-------------------------------------------------------------------------------------------------
-long Enum::value(const std::string& name) const
+Enum::EnumValue Enum::value(const std::string& name) const
 {
-    const NameIndex& names = m_pairs.get<Name>();
+    auto it = m_enums.findKey(name);
 
-    NameIndex::const_iterator it = names.find(name);
-    if (it == names.end())
+    if (it == m_enums.end())
         CAMP_ERROR(EnumNameNotFound(name, m_name));
 
-    return it->value;
+    return it->second;
 }
 
 //-------------------------------------------------------------------------------------------------
 bool Enum::operator==(const Enum& other) const
 {
-    return m_name == other.m_name;
+    return name() == other.name();
 }
 
 //-------------------------------------------------------------------------------------------------
 bool Enum::operator!=(const Enum& other) const
 {
-    return m_name != other.m_name;
+    return name() != other.name();
 }
 
 //-------------------------------------------------------------------------------------------------

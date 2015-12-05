@@ -35,7 +35,6 @@
 
 
 #include <camp/userproperty.hpp>
-#include <camp/errors.hpp>
 
 
 namespace camp
@@ -70,22 +69,22 @@ protected:
     /**
      * \see Property::isReadable
      */
-    virtual bool isReadable() const;
+    virtual bool isReadable() const override;
 
     /**
      * \see Property::isWritable
      */
-    virtual bool isWritable() const;
+    virtual bool isWritable() const override;
 
     /**
      * \see Property::getValue
      */
-    virtual Value getValue(const UserObject& object) const;
+    virtual Value getValue(const UserObject& object) const override;
 
     /**
      * \see Property::setValue
      */
-    virtual void setValue(const UserObject& object, const Value& value) const;
+    virtual void setValue(const UserObject& object, const Value& value) const override;
 
 private:
 

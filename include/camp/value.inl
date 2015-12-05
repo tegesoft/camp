@@ -66,7 +66,7 @@ T Value::to() const
     {
         return detail::ValueTo<T>::convert(*this);
     }
-    catch (boost::bad_lexical_cast&)
+    catch (camp::util::bad_conversion&)
     {
         CAMP_ERROR(BadType(type(), mapType<T>()));
     }
@@ -98,14 +98,14 @@ bool Value::isCompatible() const
 template <typename T>
 typename T::result_type Value::visit(T visitor) const
 {
-    return boost::apply_visitor(visitor, m_value);
+    return util::apply_visitor(visitor, m_value);
 }
 
 //-------------------------------------------------------------------------------------------------
 template <typename T>
 typename T::result_type Value::visit(T visitor, const Value& other) const
 {
-    return boost::apply_visitor(visitor, m_value, other.m_value);
+    return util::apply_visitor(visitor, m_value, other.m_value);
 }
 
 } // namespace camp

@@ -39,10 +39,7 @@
 #include <camp/errors.hpp>
 #include <camp/detail/objecttraits.hpp>
 #include <camp/detail/objectholder.hpp>
-#include <boost/operators.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <camp/util.hpp>
 #include <string>
 
 
@@ -51,6 +48,7 @@ namespace camp
 class Property;
 class UserProperty;
 class Value;
+class Args;
 class ParentObject;
 
 /**
@@ -61,7 +59,7 @@ class ParentObject;
  *
  * \sa EnumObject
  */
-class CAMP_API UserObject : boost::totally_ordered<UserObject>
+class CAMP_API UserObject
 {
 public:
 
@@ -190,7 +188,7 @@ public:
      *
      * \return Reference to this
      */
-    UserObject& operator=(const UserObject& other);
+    UserObject& operator = (const UserObject& other);
 
     /**
      * \brief Operator == to compare equality between two user objects
@@ -201,7 +199,9 @@ public:
      *
      * \return True if both user objects are the same, false otherwise
      */
-    bool operator==(const UserObject& other) const;
+    bool operator == (const UserObject& other) const;
+
+    bool operator != (const UserObject& other) const {return !(*this == other);}
 
     /**
      * \brief Operator < to compare two user objects
@@ -210,7 +210,7 @@ public:
      *
      * \return True if this < other
      */
-    bool operator<(const UserObject& other) const;
+    bool operator < (const UserObject& other) const;
 
 public:
 
@@ -285,8 +285,8 @@ private:
 private:
 
     const Class* m_class; ///< Metaclass of the stored object
-    boost::shared_ptr<detail::AbstractObjectHolder> m_holder; ///< Optional abstract holder storing the object
-    boost::scoped_ptr<ParentObject> m_parent; ///< Optional parent object
+    std::shared_ptr<detail::AbstractObjectHolder> m_holder; ///< Optional abstract holder storing the object
+    std::unique_ptr<ParentObject> m_parent; ///< Optional parent object
     const UserObject* m_child; ///< Optional pointer to the child object (m_parent.object.m_child == this)
 };
 
@@ -296,7 +296,7 @@ private:
  *
  * A parent object is composed of a <object, property> pair.
  */
-class ParentObject : boost::noncopyable
+class ParentObject : util::noncopyable
 {
 public:
 

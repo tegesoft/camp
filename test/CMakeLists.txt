@@ -30,7 +30,7 @@
 ###############################################################################
 
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0)
 
 # set project's name
 project(CAMP_TEST)
@@ -68,6 +68,9 @@ set(CAMP_TEST_SRCS
     propertyaccess.hpp
     functionaccess.cpp
     functionaccess.hpp
+    traits.hpp
+    traits.cpp
+    example_mainpage.cpp
 )
 
 # find Boost
@@ -89,6 +92,10 @@ add_definitions(-DBOOST_TEST_NO_LIB)
 
 # instruct CMake to build an executable from all of the source files
 add_executable(camptest ${CAMP_TEST_SRCS})
+
+# required standard level (needed to pass -std=c++11 to gcc and clang)
+set_property(TARGET camptest PROPERTY CXX_STANDARD 11) # fails silently
+target_compile_features(camptest PRIVATE cxx_range_for cxx_variable_templates) # required
 
 # define d suffix on windows
 if(WIN32)

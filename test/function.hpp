@@ -34,11 +34,12 @@
 #include <camp/enum.hpp>
 #include <camp/class.hpp>
 #include <camp/value.hpp>
-#include <boost/shared_ptr.hpp>
 #include <string>
 
 namespace FunctionTest
 {
+    using namespace std::placeholders;
+    
     enum MyEnum
     {
         Zero = 0,
@@ -104,8 +105,8 @@ namespace FunctionTest
         const Inner& getInner() const {return inner;}
         Inner* innerPtr;
         const Inner* getInnerPtr() const {return innerPtr;}
-        boost::shared_ptr<Inner> innerSmartPtr;
-        const boost::shared_ptr<Inner> getInnerSmartPtr() {return innerSmartPtr;}
+        std::shared_ptr<Inner> innerSmartPtr;
+        const std::shared_ptr<Inner> getInnerSmartPtr() {return innerSmartPtr;}
 
         int f20(int x) {return x;}
         int f21(int x, int y) {return x + y;}
@@ -168,10 +169,10 @@ namespace FunctionTest
             .function("f18", &MyClass::Inner::f18, &MyClass::innerSmartPtr)    // smart pointer
             .function("f19", &MyClass::Inner::f19, &MyClass::getInnerSmartPtr) // getter returning a smart pointer
 
-            // ***** boost::function *****
-            .function("f20", boost::function<int (MyClass&, int)>(boost::bind(&MyClass::f20, _1, _2)))
-            .function("f21", boost::function<int (MyClass&, int)>(boost::bind(&MyClass::f21, _1, _2, 20)))
-            .function("f22", boost::function<int (MyClass&, int)>(boost::bind(boost::bind(&MyClass::f22, _1, _2, _3, 30), _1, _2, 20)))
+            // ***** std::function *****
+            .function("f20", std::function<int (MyClass&, int)>(std::bind(&MyClass::f20, _1, _2)))
+            .function("f21", std::function<int (MyClass&, int)>(std::bind(&MyClass::f21, _1, _2, 20)))
+            .function("f22", std::function<int (MyClass&, int)>(std::bind(std::bind(&MyClass::f22, _1, _2, _3, 30), _1, _2, 20)))
             ;
     }
 }

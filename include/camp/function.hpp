@@ -46,7 +46,7 @@
 
 namespace camp
 {
-template <typename T> class ClassBuilder;
+class Args;
 class UserObject;
 class ClassVisitor;
 
@@ -112,7 +112,7 @@ public:
      * \brief Call the function
      *
      * \param object Object
-     * \param args Arguments to pass to the function (empty list by default)
+     * \param args Arguments to pass to the function, for example "camp::Args::empty"
      *
      * \return Value returned by the function call
      *
@@ -122,6 +122,13 @@ public:
      * \throw BadArgument one of the arguments can't be converted to the requested type
      */
     Value call(const UserObject& object, const Args& args = Args::empty) const;
+
+    // todo: pass args using variadic template:
+    //    template <typename ...A>
+    //    Value call(const UserObject& object, A... a) const
+    //    {
+    //        return call(object, callWithArgs(a...));
+    //    }
 
     /**
      * \brief Accept the visitation of a ClassVisitor

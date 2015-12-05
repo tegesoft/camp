@@ -15,10 +15,10 @@
 ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 ** copies of the Software, and to permit persons to whom the Software is
 ** furnished to do so, subject to the following conditions:
-** 
+**
 ** The above copyright notice and this permission notice shall be included in
 ** all copies or substantial portions of the Software.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 ** IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 ** FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,9 +36,6 @@
 
 #include <camp/detail/rawtype.hpp>
 #include <camp/detail/issmartpointer.hpp>
-#include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/is_pointer.hpp>
-#include <boost/utility/enable_if.hpp>
 
 
 namespace camp
@@ -93,7 +90,7 @@ struct ObjectTraits<T*>
 {
     enum
     {
-        isWritable = !boost::is_const<T>::value,
+        isWritable = !std::is_const<T>::value,
         isRef = true
     };
 
@@ -109,11 +106,11 @@ struct ObjectTraits<T*>
  * Specialized version for smart pointers
  */
 template <template <typename> class T, typename U>
-struct ObjectTraits<T<U>, typename boost::enable_if<IsSmartPointer<T<U>, U> >::type>
+struct ObjectTraits<T<U>, typename std::enable_if<IsSmartPointer<T<U>, U>::value>::type>
 {
     enum
     {
-        isWritable = !boost::is_const<U>::value,
+        isWritable = !std::is_const<U>::value,
         isRef = true
     };
 
@@ -122,7 +119,7 @@ struct ObjectTraits<T<U>, typename boost::enable_if<IsSmartPointer<T<U>, U> >::t
     typedef typename RawType<U>::Type DataType;
 
     static RefReturnType get(void* pointer) {return static_cast<U*>(pointer);}
-    static PointerType getPointer(T<U> value) {return boost::get_pointer(value);}
+    static PointerType getPointer(T<U> value) {return get_pointer(value);}
 };
 
 /*
@@ -145,11 +142,11 @@ struct ObjectTraits<T[N]>
  * Specialized version for references to non-ref types
  */
 template <typename T>
-struct ObjectTraits<T&, typename boost::disable_if<boost::is_pointer<typename ObjectTraits<T>::RefReturnType> >::type>
+struct ObjectTraits<T&, typename std::enable_if<!std::is_pointer<typename ObjectTraits<T>::RefReturnType>::value >::type>
 {
     enum
     {
-        isWritable = !boost::is_const<T>::value,
+        isWritable = !std::is_const<T>::value,
         isRef = true
     };
 
@@ -165,7 +162,8 @@ struct ObjectTraits<T&, typename boost::disable_if<boost::is_pointer<typename Ob
  * Specialized version for references to ref types -- just remove the reference modifier
  */
 template <typename T>
-struct ObjectTraits<T&, typename boost::enable_if<boost::is_pointer<typename ObjectTraits<T>::RefReturnType> >::type> : ObjectTraits<T>
+struct ObjectTraits<T&, typename std::enable_if<std::is_pointer<typename ObjectTraits<T>::RefReturnType>::value >::type>
+    : ObjectTraits<T>
 {
 };
 

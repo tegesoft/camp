@@ -15,10 +15,10 @@
 ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 ** copies of the Software, and to permit persons to whom the Software is
 ** furnished to do so, subject to the following conditions:
-** 
+**
 ** The above copyright notice and this permission notice shall be included in
 ** all copies or substantial portions of the Software.
-** 
+**
 ** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 ** IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 ** FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,7 +36,6 @@
 
 #include <camp/detail/objecttraits.hpp>
 #include <camp/detail/yesnotype.hpp>
-#include <boost/utility/enable_if.hpp>
 
 
 namespace camp
@@ -121,7 +120,7 @@ struct DynamicTypeId
  * Specialization of DynamicTypeId for types that don't implement CAMP RTTI
  */
 template <typename T>
-struct DynamicTypeId<T, typename boost::disable_if<HasCampRtti<T> >::type>
+struct DynamicTypeId<T, typename std::enable_if<!HasCampRtti<T>::value >::type>
 {
     static const char* get(const T&)
     {
@@ -156,7 +155,7 @@ struct SafeTypeId
  * Specialization of SafeTypeId for types that have no CAMP id
  */
 template <typename T>
-struct SafeTypeId<T, typename boost::disable_if<HasStaticTypeId<T> >::type>
+struct SafeTypeId<T, typename std::enable_if<!HasStaticTypeId<T>::value >::type>
 {
     static const char* get()
     {

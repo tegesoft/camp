@@ -29,7 +29,6 @@
 
 #include "userobject.hpp"
 #include <camp/classget.hpp>
-#include <camp/errors.hpp>
 #include <camp/userobject.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -141,12 +140,86 @@ BOOST_AUTO_TEST_CASE(set)
 }
 
 //-----------------------------------------------------------------------------
-BOOST_AUTO_TEST_CASE(call)
+BOOST_AUTO_TEST_CASE(callBasic)
 {
     MyClass object(9);
     camp::UserObject userObject(object);
 
     BOOST_CHECK_EQUAL(userObject.call("f"), camp::Value(9));
+}
+
+//----------------------------------------------------------------------------- ****
+BOOST_AUTO_TEST_CASE(callMultiArgs1)
+{
+    Call object;
+    camp::UserObject userObject(object);
+
+    BOOST_CHECK_THROW(userObject.call("meth1"), std::exception);
+    
+    userObject.call("meth1", camp::Args(7));
+    BOOST_CHECK_EQUAL(object.lastCalled, "meth1");
+    BOOST_CHECK_EQUAL(object.sum, 7);
+}
+
+BOOST_AUTO_TEST_CASE(callMultiArgs2)
+{
+    Call object;
+    camp::UserObject userObject(object);
+    
+    BOOST_CHECK_THROW(userObject.call("meth2"), std::exception);
+    BOOST_CHECK_THROW(userObject.call("meth2", camp::Args(11)), std::exception);
+//    BOOST_CHECK_THROW(userObject.call("meth2", camp::Args(11,2,333)), std::exception);
+    
+    userObject.call("meth2", camp::Args(7, 8));
+    BOOST_CHECK_EQUAL(object.lastCalled, "meth2");
+    BOOST_CHECK_EQUAL(object.sum, 7+8);
+}
+
+BOOST_AUTO_TEST_CASE(callMultiArgs3)
+{
+    Call object;
+    camp::UserObject userObject(object);
+    
+    BOOST_CHECK_THROW(userObject.call("meth3"), std::exception);
+    
+    userObject.call("meth3", camp::Args(7, 8, -99));
+    BOOST_CHECK_EQUAL(object.lastCalled, "meth3");
+    BOOST_CHECK_EQUAL(object.sum, 7+8-99);
+}
+
+// todo: variadic template:
+//BOOST_AUTO_TEST_CASE(callMultiArgs8)
+//{
+//    Call object;
+//    camp::UserObject userObject(object);
+//    
+//    BOOST_CHECK_THROW(userObject.call("meth8"), std::exception);
+//    
+//    userObject.call("meth8", camp::Args(7, 8, -99, 77, 12, 76, 45, 3));
+//    BOOST_CHECK_EQUAL(object.lastCalled, "meth8");
+//    BOOST_CHECK_EQUAL(object.sum, 7+8-99+77-12+76+45+3);
+//}
+//-----------------------------------------------------------------------------
+BOOST_AUTO_TEST_CASE(callArgs1)
+{
+    Call object;
+    camp::UserObject userObject(object);
+    
+    BOOST_CHECK_THROW(userObject.call("cos"), std::exception);
+    
+    BOOST_CHECK_EQUAL(userObject.call("cos", camp::Args(0.0)), camp::Value(std::cos(0.0)));
+//    BOOST_CHECK_EQUAL(userObject.call("cos", 0.0), camp::Value(std::cos(0.0)));
+}
+
+BOOST_AUTO_TEST_CASE(callArgs2)
+{
+    Call object;
+    camp::UserObject userObject(object);
+    
+    BOOST_CHECK_THROW(userObject.call("concat"), std::exception);
+    
+    BOOST_CHECK_EQUAL(userObject.call("concat", camp::Args("one", "two")), camp::Value("onetwo"));
+//    BOOST_CHECK_EQUAL(userObject.call("concat", "one", "two"), camp::Value("onetwo"));
 }
 
 //-----------------------------------------------------------------------------
@@ -184,6 +257,7 @@ BOOST_AUTO_TEST_CASE(nonCopyableClass)
     MyNonCopyableClass object;
     camp::UserObject userObject(object);
     MyNonCopyableClass& ref = userObject.get<MyNonCopyableClass>();
+    (void)ref;
 }
 
 //-----------------------------------------------------------------------------

@@ -34,17 +34,10 @@
 #define CAMP_DETAIL_ENUMMANAGER_HPP
 
 
-#include <camp/config.hpp>
 #include <camp/detail/observernotifier.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
+#include <camp/util.hpp>
 #include <string>
-
-
-namespace bm = boost::multi_index;
+#include <map>
 
 namespace camp
 {
@@ -60,7 +53,7 @@ namespace detail
  *
  * \sa Enum
  */
-class CAMP_API EnumManager : public ObserverNotifier, boost::noncopyable
+class CAMP_API EnumManager : public ObserverNotifier, util::noncopyable
 {
 public:
 
@@ -77,12 +70,11 @@ public:
      * This is the entry point for every metaenum creation. This
      * function also notifies registered observers after successful creations.
      *
-     * \param name Name of the metaenum to create (must be unique)
-     * \param id Identifier of the C++ enum bound to the metaenum
+     * \param id Identifier of the C++ enum bound to the metaenum (unique).
      *
      * \return Reference to the new metaenum
      */
-    Enum& addClass(const std::string& name, const std::string& id);
+    Enum& addClass(const std::string& id);
 
     /**
      * \brief Get the total number of metaenums
@@ -106,17 +98,6 @@ public:
     const Enum& getByIndex(std::size_t index) const;
 
     /**
-     * \brief Get a metaenum from its name
-     *
-     * \param name Name of the metaenum to retrieve
-     *
-     * \return Reference to the requested metaenum
-     *
-     * \throw EnumNotFound name is not the name of an existing metaenum
-     */
-    const Enum& getByName(const std::string& name) const;
-
-    /**
      * \brief Get a metaenum from a C++ type
      *
      * \param id Identifier of the C++ type
@@ -135,7 +116,7 @@ public:
      *
      * \param id Identifier of the C++ type
      *
-     * \return Pointer to the requested metaenum, or 0 if not found
+     * \return Pointer to the requested metaenum, or null pointer if not found
      */
     const Enum* getByIdSafe(const std::string& id) const;
 
@@ -162,29 +143,8 @@ private:
      */
     ~EnumManager();
 
-    /**
-     * \brief Structure gathering an enum, its type identifier and its name
-     */
-    struct EnumInfo
-    {
-        std::string id;
-        std::string name;
-        boost::shared_ptr<Enum> enumPtr;
-    };
-
-    struct Id;
-    struct Name;
-
-    typedef boost::multi_index_container<EnumInfo,
-        bm::indexed_by<bm::ordered_unique<bm::tag<Id>,   bm::member<EnumInfo, std::string, &EnumInfo::id> >,
-                       bm::ordered_unique<bm::tag<Name>, bm::member<EnumInfo, std::string, &EnumInfo::name> >
-        >
-    > EnumTable;
-
-    typedef EnumTable::index<Id>::type IdIndex;
-    typedef EnumTable::index<Name>::type NameIndex;
-
-    EnumTable m_enums; ///< Table storing enums indexed by their id and name
+    typedef std::map<std::string, Enum*> EnumTable;
+    EnumTable m_enums; ///< Table storing enums indexed by their ID
 };
 
 } // namespace detail
