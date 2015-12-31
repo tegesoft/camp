@@ -1,4 +1,6 @@
-*Ponder* : https://github.com/billyquith/ponder is a new project that brings CAMP to a new life and a new level. Please prefer Ponder to Camp. -- _the former Camp team_ --
+*Ponder* : https://github.com/billyquith/ponder is a new project carried by Billy Quith, that brings CAMP to a new life and a new level. Please prefer Ponder to Camp, you'll get rid of Boost, you'll benefit from C++11 and you'll get good support from Billy.
+
+-- the former Camp team --
 
 ***
 
