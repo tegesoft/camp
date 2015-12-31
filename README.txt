@@ -1,3 +1,7 @@
+> *Ponder* : https://github.com/billyquith/ponder is a new project that brings CAMP to a new life and a new level. Please
+> prefer Ponder to Camp. -- the former Camp team --
+
+***
 
 CAMP is a multi-purpose reflection library developped by Technogerma Systems France and then by Tegesoft (where the dev team has moved)
 (http://www.tegesoft.com).
