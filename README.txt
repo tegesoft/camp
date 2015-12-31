@@ -1,5 +1,4 @@
-> *Ponder* : https://github.com/billyquith/ponder is a new project that brings CAMP to a new life and a new level. Please
-> prefer Ponder to Camp. -- the former Camp team --
+*Ponder* : https://github.com/billyquith/ponder is a new project that brings CAMP to a new life and a new level. Please prefer Ponder to Camp. -- _the former Camp team_ --
 
 ***
 
