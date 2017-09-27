@@ -1,6 +1,15 @@
-*Ponder* : https://github.com/billyquith/ponder is a new project carried by Billy Quith, that brings CAMP to a new life and a new level. Please prefer Ponder to Camp, you'll get rid of Boost, you'll benefit from C++11 and you'll get good support from Billy.
+CAMP is currently unmaintained; if you intend to use it, we strongly recommend to have a look at these two forks:
 
--- the former Camp team --
+https://github.com/fw4spl-org/camp
+Based on the original API, this fork brings modernity to the internal code (C++11, Qt5), as well as improvements to the
+build files for compatibility with Debian packaging.
+
+https://github.com/billyquith/ponder
+Ponder is a new project carried by Billy Quith, that brings CAMP to a new life and a new level.
+It is more a rewrite than a fork, as many things were redesigned and reimplemented from scratch.
+Please prefer Ponder to CAMP: you'll get rid of Boost, you'll benefit from C++11 and you'll get good support from Billy.
+
+-- The former CAMP team --
 
 ***
 
