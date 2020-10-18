@@ -23,6 +23,9 @@ It provides an abstraction for most of the high-level concepts of C++:
 - Functions
 - Objects
 - Variables
+- Abstraction
+- Inheritance
+- Encpasulations
 
 By wrapping all these concepts into abstract structures, CAMP provides an extra layer of
 flexibility to programs, and allow them to fully expose their data structures at runtime.
